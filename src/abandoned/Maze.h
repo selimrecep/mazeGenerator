@@ -1,9 +1,10 @@
 #pragma once
-#include "CellPos.h"
+#include "../CellPos.h"
+#include "../random.h"
 #include "Table.h"
-#include "random.h"
 #include <array>
 #include <cassert>
+
 
 constexpr CellPos invalidPoint{-1, -1};
 

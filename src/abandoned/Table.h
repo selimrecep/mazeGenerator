@@ -1,5 +1,5 @@
 #pragma once
-#include "CellPos.h"
+#include "../CellPos.h"
 #include <array>
 #include <cassert>
 #include <iostream>
@@ -39,7 +39,7 @@ public:
       for (size_t j{0}; j < M; ++j)
         grid[i][j] = defaultValue;
   }
-  void printTable(std::wostream &stream = std::wcout) {
+  void printTable(std::wostream& stream = std::wcout) {
     stream << TL;
     for (size_t i{0}; i < M - 1; ++i) {
       stream << H << H << MT;
@@ -82,14 +82,14 @@ public:
 
     stream << '\n';
   }
-  bool *operator[](int i) { return grid[i]; }
+  bool* operator[](int i) { return grid[i]; }
 
-  bool &operator[](CellPos pos) {
+  bool& operator[](CellPos pos) {
     if (pos.row < 0 || pos.row >= rows || pos.column < 0 ||
         pos.column >= columns)
       assert(false && "invalid bounds");
     return grid[pos.row][pos.column];
   }
 
-  grid_t<N, M> &getGrid() { return grid; }
+  grid_t<N, M>& getGrid() { return grid; }
 };
