@@ -2,3 +2,6 @@
 /.vscode
 /main.obj
 /vc140.pdb
+src/main.exe
+src/main.obj
+src/main.pdb
