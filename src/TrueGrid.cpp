@@ -5,7 +5,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
-
+// test
 bool TrueGrid::hasVisitedPoint(CellPos pos) {
   return hasVisited[pos.row][pos.column] == HasVisited::HAS_VISITED;
 }
@@ -57,7 +57,7 @@ TrueGrid::TrueGrid(int n, int m, GridCellState defaultValue) {
     for (int j{0}; j < m; ++j)
       grid[i][j] = defaultValue;
 }
-void TrueGrid::printTable(std::wostream& stream) {
+void TrueGrid::printTable(std::wostream &stream) {
   bool writtenEntryPoint{!hasEnterOutPoint};
   bool writtenExitPoint{!hasEnterOutPoint};
 
@@ -123,18 +123,18 @@ void TrueGrid::printTable(std::wostream& stream) {
 
   stream << '\n';
 }
-columns_grid_t& TrueGrid::operator[](int i) { return grid[i]; }
+columns_grid_t &TrueGrid::operator[](int i) { return grid[i]; }
 
-GridCellState& TrueGrid::operator[](CellPos pos) {
+GridCellState &TrueGrid::operator[](CellPos pos) {
   if (pos.row < 0 || pos.row >= rows || pos.column < 0 || pos.column >= columns)
     assert(false && "invalid bounds");
   return grid[pos.row][pos.column];
 }
 
-grid_t& TrueGrid::getGrid() { return grid; }
+grid_t &TrueGrid::getGrid() { return grid; }
 
-int TrueGrid::getAdjacentWallsAndCells(CellPos pos, adjacent_walls_t& walls,
-                                       adjacent_points_t& points) {
+int TrueGrid::getAdjacentWallsAndCells(CellPos pos, adjacent_walls_t &walls,
+                                       adjacent_points_t &points) {
   int n{0};
   walls.fill(nullptr);
   points.fill({false, invalidPoint, GridCellState::NOTFILLED});
@@ -183,7 +183,7 @@ bool TrueGrid::isExitPoint(bool haveWrittenExit, int row, int column) {
          (leavePoint.row == row && leavePoint.column == column);
 }
 
-bool TrueGrid::isSpace(bool& haveWrittenEntry, bool& haveWrittenExit, int row,
+bool TrueGrid::isSpace(bool &haveWrittenEntry, bool &haveWrittenExit, int row,
                        int column) {
   if (isEntryPoint(haveWrittenEntry, row, column)) {
     haveWrittenEntry = true;
@@ -198,13 +198,13 @@ bool TrueGrid::isSpace(bool& haveWrittenEntry, bool& haveWrittenExit, int row,
   return false;
 }
 
-void TrueGrid::printAsMatrix(std::wostream& stream) {
+void TrueGrid::printAsMatrix(std::wostream &stream) {
   bool_grid_t gridBinary;
   int gridRowCount{2 * rows + 1};
   int gridColumnCount{2 * columns + 1};
 
   gridBinary.resize(gridRowCount);
-  for (auto& row : gridBinary) {
+  for (auto &row : gridBinary) {
     row.resize(gridColumnCount);
     std::fill(row.begin(), row.end(), 0);
   }
