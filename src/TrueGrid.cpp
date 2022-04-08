@@ -5,7 +5,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
-// test
+
 bool TrueGrid::hasVisitedPoint(CellPos pos) {
   return hasVisited[pos.row][pos.column] == HasVisited::HAS_VISITED;
 }
