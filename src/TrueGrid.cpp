@@ -253,6 +253,8 @@ std::wstring TrueGrid::printRepresentingChar(GridCellState state) {
     return L"+ ";
   case GridCellState::BEEN_LEFT:
     return L"- ";
+  case GridCellState::STAR:
+    return L"* ";
   default:
     return L"--";
   }
@@ -277,6 +279,8 @@ wchar_t TrueGrid::printRepresentingBinaryChar(GridCellState state) {
     return L'+';
   case GridCellState::BEEN_LEFT:
     return L'-';
+  case GridCellState::STAR:
+    return L'*';
   default:
     return L'*';
   }

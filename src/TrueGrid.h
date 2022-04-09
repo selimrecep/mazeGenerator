@@ -37,6 +37,7 @@ enum class GridCellState {
   LEFT_LOOKING,
   BEEN_VISITED,
   BEEN_LEFT,
+  STAR
 };
 
 enum class HasVisited { NOT_VISITED, HAS_VISITED };
