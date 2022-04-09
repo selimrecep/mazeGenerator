@@ -20,4 +20,14 @@ public:
   void printMaze(std::wostream& stream = std::wcout);
   void printAsMatrix(std::wostream& stream = std::wcout);
   void generate();
+
+  int getTotalCellCount();
+  bool hasEnterAndExit();
+  void getEnterAndExitPoint(CellPos& enterPoint, CellPos& exitPoint);
+  int getAdjacentWallsAndCells(CellPos pos, adjacent_walls_t& walls,
+                               adjacent_points_t& points);
+  int getAdjacentWallsAndCellsMarked(CellPos pos, adjacent_walls_t& walls,
+                                     adjacent_points_t& points);
+
+  TrueGrid& getTrueGrid();
 };

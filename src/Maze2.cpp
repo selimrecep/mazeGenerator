@@ -51,3 +51,23 @@ void Maze2::generate() {
 CellPos Maze2::getRandomPoint() {
   return {getRandom(0, grid.rows - 1), getRandom(0, grid.columns - 1)};
 }
+
+int Maze2::getTotalCellCount() { return grid.rows * grid.columns; }
+
+bool Maze2::hasEnterAndExit() { return grid.hasEnterAndExit(); }
+
+void Maze2::getEnterAndExitPoint(CellPos& enterPoint, CellPos& exitPoint) {
+  enterPoint = grid.enterPoint;
+  exitPoint = grid.leavePoint;
+}
+
+int Maze2::getAdjacentWallsAndCells(CellPos pos, adjacent_walls_t& walls,
+                                    adjacent_points_t& points) {
+  return grid.getAdjacentWallsAndCells(pos, walls, points);
+}
+
+int Maze2::getAdjacentWallsAndCellsMarked(CellPos pos, adjacent_walls_t& walls,
+                                          adjacent_points_t& points) {
+  return grid.getAdjacentWallsAndCellsMarked(pos, walls, points);
+}
+TrueGrid& Maze2::getTrueGrid() { return grid; }

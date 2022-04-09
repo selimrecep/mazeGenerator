@@ -57,7 +57,7 @@ TrueGrid::TrueGrid(int n, int m, GridCellState defaultValue) {
     for (int j{0}; j < m; ++j)
       grid[i][j] = defaultValue;
 }
-void TrueGrid::printTable(std::wostream &stream) {
+void TrueGrid::printTable(std::wostream& stream) {
   bool writtenEntryPoint{!hasEnterOutPoint};
   bool writtenExitPoint{!hasEnterOutPoint};
 
@@ -77,11 +77,10 @@ void TrueGrid::printTable(std::wostream &stream) {
   for (int i{0}; i < rows - 1; ++i) {
     stream << (isSpace(writtenEntryPoint, writtenExitPoint, i, 0) ? L' ' : V);
     for (int j{0}; j < columns - 1; ++j) {
-      ch = (grid[i][j] == GridCellState::FILLED ? FULL_CHAR : EMPTY_CHAR);
+      ch = printRepresentingChar(grid[i][j]);
       stream << ch << (wallsColumns[i][j] == WallCellState::CLOSED ? V : L' ');
     }
-    ch = (grid[i][columns - 1] == GridCellState::FILLED ? FULL_CHAR
-                                                        : EMPTY_CHAR);
+    ch = printRepresentingChar(grid[i][columns - 1]);
     stream << ch
            << (isSpace(writtenEntryPoint, writtenExitPoint, i, columns - 1)
                    ? L' '
@@ -99,12 +98,11 @@ void TrueGrid::printTable(std::wostream &stream) {
 
   stream << V;
   for (int j{0}; j < columns - 1; ++j) {
-    ch = (grid[rows - 1][j] == GridCellState::FILLED ? FULL_CHAR : EMPTY_CHAR);
+    ch = printRepresentingChar(grid[rows - 1][j]);
     stream << ch
            << (wallsColumns[rows - 1][j] == WallCellState::CLOSED ? V : L' ');
   }
-  ch = (grid[rows - 1][columns - 1] == GridCellState::FILLED ? FULL_CHAR
-                                                             : EMPTY_CHAR);
+  ch = printRepresentingChar(grid[rows - 1][columns - 1]);
   stream << ch << V;
   stream << '\n';
 
@@ -123,18 +121,18 @@ void TrueGrid::printTable(std::wostream &stream) {
 
   stream << '\n';
 }
-columns_grid_t &TrueGrid::operator[](int i) { return grid[i]; }
+columns_grid_t& TrueGrid::operator[](int i) { return grid[i]; }
 
-GridCellState &TrueGrid::operator[](CellPos pos) {
+GridCellState& TrueGrid::operator[](CellPos pos) {
   if (pos.row < 0 || pos.row >= rows || pos.column < 0 || pos.column >= columns)
     assert(false && "invalid bounds");
   return grid[pos.row][pos.column];
 }
 
-grid_t &TrueGrid::getGrid() { return grid; }
+grid_t& TrueGrid::getGrid() { return grid; }
 
-int TrueGrid::getAdjacentWallsAndCells(CellPos pos, adjacent_walls_t &walls,
-                                       adjacent_points_t &points) {
+int TrueGrid::getAdjacentWallsAndCells(CellPos pos, adjacent_walls_t& walls,
+                                       adjacent_points_t& points) {
   int n{0};
   walls.fill(nullptr);
   points.fill({false, invalidPoint, GridCellState::NOTFILLED});
@@ -174,6 +172,44 @@ int TrueGrid::getAdjacentWallsAndCells(CellPos pos, adjacent_walls_t &walls,
   return n;
 }
 
+int TrueGrid::getAdjacentWallsAndCellsMarked(CellPos pos,
+                                             adjacent_walls_t& walls,
+                                             adjacent_points_t& points) {
+  int n{0};
+  walls.fill(nullptr);
+  points.fill({false, invalidPoint, GridCellState::NOTFILLED});
+
+  if (pos.row > 0) {
+    walls[n] = &wallsRows[pos.row - 1][pos.column];
+    points[n].valid = true;
+    points[n].pos = {pos.row - 1, pos.column};
+    points[n].cellState = grid[pos.row][pos.column];
+  }
+  ++n;
+  if (pos.column < columns - 1) {
+    walls[n] = &wallsColumns[pos.row][pos.column];
+    points[n].valid = true;
+    points[n].pos = {pos.row, pos.column + 1};
+    points[n].cellState = grid[pos.row][pos.column];
+  }
+  ++n;
+  if (pos.row < rows - 1) {
+    walls[n] = &wallsRows[pos.row][pos.column];
+    points[n].valid = true;
+    points[n].pos = {pos.row + 1, pos.column};
+    points[n].cellState = grid[pos.row][pos.column];
+  }
+  ++n;
+  if (pos.column > 0) {
+    walls[n] = &wallsColumns[pos.row][pos.column - 1];
+    points[n].valid = true;
+    points[n].pos = {pos.row, pos.column - 1};
+    points[n].cellState = grid[pos.row][pos.column];
+  }
+  ++n;
+  return n;
+}
+
 bool TrueGrid::isEntryPoint(bool haveWrittenEntry, int row, int column) {
   return !haveWrittenEntry &&
          (enterPoint.row == row && enterPoint.column == column);
@@ -183,7 +219,7 @@ bool TrueGrid::isExitPoint(bool haveWrittenExit, int row, int column) {
          (leavePoint.row == row && leavePoint.column == column);
 }
 
-bool TrueGrid::isSpace(bool &haveWrittenEntry, bool &haveWrittenExit, int row,
+bool TrueGrid::isSpace(bool& haveWrittenEntry, bool& haveWrittenExit, int row,
                        int column) {
   if (isEntryPoint(haveWrittenEntry, row, column)) {
     haveWrittenEntry = true;
@@ -198,26 +234,84 @@ bool TrueGrid::isSpace(bool &haveWrittenEntry, bool &haveWrittenExit, int row,
   return false;
 }
 
-void TrueGrid::printAsMatrix(std::wostream &stream) {
+std::wstring TrueGrid::printRepresentingChar(GridCellState state) {
+  switch (state) {
+  case GridCellState::FILLED:
+    return FULL_CHAR;
+  case GridCellState::NOTFILLED:
+    return EMPTY_CHAR;
+  case GridCellState::UP_LOOKING:
+    return L"^ ";
+  case GridCellState::RIGHT_LOOKING:
+    return L"> ";
+    break;
+  case GridCellState::DOWN_LOOKING:
+    return L"v ";
+  case GridCellState::LEFT_LOOKING:
+    return L"< ";
+  case GridCellState::BEEN_VISITED:
+    return L"+ ";
+  case GridCellState::BEEN_LEFT:
+    return L"- ";
+  default:
+    return L"--";
+  }
+}
+
+wchar_t TrueGrid::printRepresentingBinaryChar(GridCellState state) {
+  switch (state) {
+  case GridCellState::FILLED:
+    return L'0';
+  case GridCellState::NOTFILLED:
+    return L'1';
+  case GridCellState::UP_LOOKING:
+    return L'^';
+  case GridCellState::RIGHT_LOOKING:
+    return L'>';
+    break;
+  case GridCellState::DOWN_LOOKING:
+    return L'v';
+  case GridCellState::LEFT_LOOKING:
+    return L'<';
+  case GridCellState::BEEN_VISITED:
+    return L'+';
+  case GridCellState::BEEN_LEFT:
+    return L'-';
+  default:
+    return L'*';
+  }
+}
+
+void TrueGrid::printTheMatrix(bool_grid_t& gridBinary, std::wostream& stream) {
+
+  int gridRowCount(gridBinary.size());
+  int gridColumnCount(gridBinary[0].size());
+
+  for (int i{0}; i < gridRowCount; ++i) {
+    for (int j{0}; j < gridColumnCount; ++j) {
+      stream << (printRepresentingBinaryChar(gridBinary[i][j])) << " ";
+    }
+    stream << "\n";
+  }
+  stream << "\n";
+}
+void TrueGrid::printAsMatrix(std::wostream& stream) {
   bool_grid_t gridBinary;
+
+  getAsMatrix(gridBinary);
+  printTheMatrix(gridBinary, stream);
+}
+void TrueGrid::getAsMatrix(bool_grid_t& gridBinary) {
   int gridRowCount{2 * rows + 1};
   int gridColumnCount{2 * columns + 1};
 
   gridBinary.resize(gridRowCount);
-  for (auto &row : gridBinary) {
+  for (auto& row : gridBinary) {
     row.resize(gridColumnCount);
-    std::fill(row.begin(), row.end(), 0);
+    std::fill(row.begin(), row.end(), GridCellState::FILLED);
   }
   CellPos tempEnter{};
   CellPos tempExit{};
-  /*
-    if (enterPoint.row == 0) {
-      tempEnter.row = 0;
-    } else if(enterPoint.row == rows - 1) {
-      tempEnter.row = gridRowCount - 1;
-    } else {
-      tempEnter.row = enterPoint.row * 2;
-    }*/
 
   if (enterPoint.row == 0) {
     tempEnter.row = 0;
@@ -253,34 +347,38 @@ void TrueGrid::printAsMatrix(std::wostream &stream) {
     assert(false);
   }
 
-  gridBinary[tempEnter.row][tempEnter.column] = 1;
-  gridBinary[tempExit.row][tempExit.column] = 1;
+  gridBinary[tempEnter.row][tempEnter.column] = GridCellState::NOTFILLED;
+  gridBinary[tempExit.row][tempExit.column] = GridCellState::NOTFILLED;
 
   for (int i{0}; i < rows; ++i) {
     for (int j{0}; j < columns; ++j) {
-      gridBinary[2 * i + 1][2 * j + 1] = grid[i][j] == GridCellState::NOTFILLED;
+      gridBinary[2 * i + 1][2 * j + 1] = grid[i][j];
     }
   }
 
   for (int i{0}; i < rows - 1; ++i) {
     for (int j{0}; j < columns; ++j) {
       gridBinary[2 * i + 2][2 * j + 1] =
-          wallsRows[i][j] == WallCellState::OPENED;
+          (wallsRows[i][j] == WallCellState::OPENED) ? GridCellState::NOTFILLED
+                                                     : GridCellState::FILLED;
     }
   }
 
   for (int i{0}; i < rows; ++i) {
     for (int j{0}; j < columns - 1; ++j) {
       gridBinary[2 * i + 1][2 * j + 2] =
-          wallsColumns[i][j] == WallCellState::OPENED;
+          (wallsColumns[i][j] == WallCellState::OPENED)
+              ? GridCellState::NOTFILLED
+              : GridCellState::FILLED;
     }
   }
+}
 
-  for (int i{0}; i < gridRowCount; ++i) {
-    for (int j{0}; j < gridColumnCount; ++j) {
-      stream << (gridBinary[i][j] ? '1' : '0') << " ";
-    }
-    stream << "\n";
-  }
-  stream << "\n";
+bool TrueGrid::hasEnterAndExit() { return hasEnterOutPoint; }
+
+walls_t& TrueGrid::getRowWalls() { return wallsRows; }
+walls_t& TrueGrid::getColumnWalls() { return wallsColumns; }
+
+CellPos TrueGrid::convertPosToBinaryPos(CellPos pos) {
+  return {pos.row * 2 + 1, pos.column * 2 + 1};
 }
